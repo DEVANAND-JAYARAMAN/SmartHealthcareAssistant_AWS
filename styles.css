@@ -1,0 +1,197 @@
+:root{
+    --bg1: #0f1724;
+    --accent: #6ee7b7;
+    --muted: #94a3b8;
+    --glass: rgba(255,255,255,0.06);
+    --glass-2: rgba(255,255,255,0.03);
+}
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+}
+
+html,body{
+    height:100%;
+    margin:0;
+    padding:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background: radial-gradient(1000px 600px at 10% 20%, rgba(99,102,241,0.12), transparent),
+                radial-gradient(800px 500px at 90% 80%, rgba(16,185,129,0.08), transparent),
+                linear-gradient(180deg, #071029 0%, #0b1220 100%);
+    background-attachment: fixed;
+    color: #f3f8ff;
+    font-size:18px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.45);
+    overflow-x: hidden;
+}
+
+body {
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+}
+/* animated background blobs */
+.bg-blob{
+    position:fixed;pointer-events:none;z-index:0;filter:blur(40px);opacity:0.9;mix-blend-mode:screen;
+    transition: transform 0.2s ease-out;
+}
+.blob-1{width:520px;height:520px;left:-120px;top:-80px;background:linear-gradient(135deg,#7c3aed,#06b6d4);animation:float1 12s ease-in-out infinite}
+.blob-2{width:420px;height:420px;right:-80px;bottom:-60px;background:linear-gradient(135deg,#ef4444,#f97316);animation:float2 14s ease-in-out infinite}
+.blob-3{width:280px;height:280px;left:60%;top:10%;background:linear-gradient(135deg,#22c55e,#06b6d4);animation:float3 10s ease-in-out infinite}
+@keyframes float1{0%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-30px) rotate(6deg)}100%{transform:translateY(0) rotate(0deg)}}
+@keyframes float2{0%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(40px) rotate(-6deg)}100%{transform:translateY(0) rotate(0deg)}}
+@keyframes float3{0%{transform:translateY(0)}50%{transform:translateY(-20px)}100%{transform:translateY(0)}}
+
+/* main layout */
+.wrap{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:2rem 2rem 8rem 2rem;
+    box-sizing:border-box;
+    width: 100%;
+}
+.container{
+    width:100%;max-width:980px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter: blur(8px);display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;position:relative;overflow:visible
+}
+.hero{padding:20px}
+h1{font-size:34px;margin:0 0 10px 0;color:#fff;text-shadow:0 6px 18px rgba(0,0,0,0.6)}
+p.lead{color:#d7e7f5;margin:0 0 18px 0;font-size:18px}
+
+/* file upload card */
+.uploadCard{background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.06)}
+input[type=file]{width:100%;padding:8px;background:transparent;border-radius:8px;color:inherit}
+.btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,#06b6d4,#7c3aed);color:#021025;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:700;box-shadow:0 8px 26px rgba(124,58,237,0.14);transition:transform .12s ease,box-shadow .12s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(16,185,129,0.08)}
+
+/* chat column */
+.chatWrap{
+    background:rgba(1,6,16,0.7);
+    border-radius:12px;
+    padding:16px;
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    flex-direction:column;
+    height: clamp(500px, 70vh, 800px);
+    backdrop-filter: blur(10px);
+}
+#chat{
+    flex:1;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+}
+.message{max-width:78%;line-height:1.5;font-size:1rem}
+.message.user{align-self:flex-end;background:linear-gradient(180deg,#06b6d4,#0ea5a3);color:#001217;padding:12px;border-radius:12px 12px 6px 12px;box-shadow:0 6px 18px rgba(6,182,180,0.06)}
+.message.bot{align-self:flex-start;background:rgba(255,255,255,0.08);color:#0b2230;padding:12px;border-radius:12px 12px 12px 6px;box-shadow:0 6px 18px rgba(2,6,23,0.4)}
+
+.controls{display:flex;gap:8px;padding-top:10px;align-items:center}
+/* input wrapper holds the input and inline icon buttons */
+.inputWrap{position:relative;flex:1}
+.controls input[type=text]{width:100%;padding:12px 108px 12px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);color:inherit;font-size:16px;box-sizing:border-box}
+.iconBtn{background:transparent;border-radius:10px;padding:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+/* inline icon buttons positioned inside the input box */
+.iconBtn.inside{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:36px;display:inline-flex;align-items:center;justify-content:center;padding:6px;border-radius:8px;background:rgba(0,0,0,0.12);border:1px solid rgba(255,255,255,0.04);right:8px}
+.iconBtn.inside.voice{right:52px}
+.iconBtn.inside.speak{right:8px}
+
+.suggestions{margin-top:12px;color:var(--muted)}
+
+/* typing indicator */
+.typing{display:inline-block;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.02);color:#d3e3ef;font-style:italic}
+
+/* small responsive adjustments */
+@media(max-width:900px){
+    html,body{font-size:16px}
+    .wrap{padding:1.5rem 1.5rem 6rem 1.5rem}
+    .container{grid-template-columns:1fr;gap:20px}
+    .chatWrap{height: clamp(400px, 60vh, 600px)}
+    h1{font-size:28px}
+    .controls input[type=text]{padding-right:92px}
+    .iconBtn.inside{width:36px;height:32px}
+    .iconBtn.inside.voice{right:44px}
+    .iconBtn.inside.speak{right:8px}
+}
+@media(max-width:480px){
+    .controls{flex-direction:column;align-items:stretch;gap:8px}
+    .inputWrap{width:100%}
+    .controls input[type=text]{padding-right:84px}
+    .iconBtn.inside{right:8px}
+    .iconBtn.inside.voice{right:48px}
+    .btn#sendBtn{width:100%}
+}
+
+/* recording / active state for icon buttons (mic/sound) */
+.iconBtn.recording{
+    background: linear-gradient(90deg, rgba(255,90,90,0.06), rgba(255,90,90,0.04));
+    border-color: rgba(255,90,90,0.14);
+    box-shadow: 0 8px 20px rgba(255,90,90,0.06);
+    transform: translateY(0);
+}
+
+/* subtle focus ring for accessibility */
+.iconBtn:focus{
+    outline: 2px solid rgba(99,102,241,0.18);
+    outline-offset: 2px;
+}
+
+/* ensure transitions feel smooth */
+.iconBtn{
+    transition: background .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(74,144,226,0.6), rgba(59,130,246,0.4));
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(74,144,226,0.8), rgba(59,130,246,0.6));
+}
+
+/* Smooth scrolling for all scrollable elements */
+* {
+    scroll-behavior: smooth;
+}
+
+/* Enhanced scrolling support */
+.container {
+    margin-bottom: 2rem;
+}
+
+/* Ensure floating elements work properly */
+.floating-nav,
+.back-to-top {
+    pointer-events: auto;
+    position: fixed;
+}
+
+/* Better focus management */
+body:focus-within {
+    scroll-behavior: smooth;
+}
+
+/* Prevent scroll issues */
+* {
+    box-sizing: border-box;
+}

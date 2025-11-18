@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Healthcare Assistant</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      /* Scroll progress indicator */
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background: linear-gradient(90deg, #4a90e2, #28a745);
+        z-index: 9999;
+        transition: width 0.1s ease;
+        box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+      }
+
+      /* Custom scrollbar styling for summary sections */
+      #summaryBox::-webkit-scrollbar,
+      #summaryText::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      #summaryBox::-webkit-scrollbar-track,
+      #summaryText::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+      
+      #summaryBox::-webkit-scrollbar-thumb,
+      #summaryText::-webkit-scrollbar-thumb {
+        background: #4a90e2;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      
+      #summaryBox::-webkit-scrollbar-thumb:hover,
+      #summaryText::-webkit-scrollbar-thumb:hover {
+        background: #357abd;
+      }
+      
+      /* Hide scroll indicator completely - it's causing visual issues */
+      .scroll-indicator {
+        display: none !important;
+      }
+      
+      /* Floating Navigation - Matches reference image */
+      .floating-nav {
+        position: fixed;
+        right: 24px;
+        bottom: 110px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border-radius: 12px;
+        padding: 8px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        z-index: 1000;
+        border: 1px solid rgba(0,0,0,0.08);
+        min-width: 90px;
+      }
+      
+      .floating-nav.show {
+        display: flex !important;
+      }
+      
+      .nav-btn {
+        background: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        min-width: 76px;
+        text-align: center;
+        opacity: 1;
+        box-shadow: 0 2px 6px rgba(66,133,244,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      
+      .nav-btn:hover {
+        background: #3367d6;
+        opacity: 1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66,133,244,0.3);
+      }
+      
+      /* Back to top button - Matches your reference image */
+      .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+        font-size: 24px;
+        font-weight: normal;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(66,133,244,0.3);
+        transition: all 0.3s ease;
+        z-index: 9999;
+        opacity: 0.9;
+      }
+      
+      .back-to-top.show {
+        display: flex !important;
+        opacity: 0.9;
+        transform: scale(1);
+      }
+      
+      .back-to-top:hover {
+        background: #3367d6;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(66,133,244,0.4);
+        opacity: 1;
+      }
+      
+      .back-to-top:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(66,133,244,0.3);
+      }
+
+      /* Premium summary styling */
+      .premium-summary {
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255,255,255,0.25) !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Improve text rendering and spacing */
+      .premium-summary * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Enhanced spacing for better readability */
+      .premium-summary h3,
+      .premium-summary h4 {
+        text-shadow: none;
+        font-optical-sizing: auto;
+      }
+
+      .premium-summary p {
+        word-spacing: 0.02em;
+        line-height: 1.75;
+      }
+
+      /* Clean card-like sections */
+      .summary-card {
+        background: rgba(255,255,255,0.6);
+        border-radius: 18px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(148,163,184,0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+      }
+
+      .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      }
+
+      /* Icon containers */
+      .icon-container {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .premium-summary::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .premium-summary::-webkit-scrollbar-track {
+        background: rgba(74,144,226,0.1);
+        border-radius: 8px;
+      }
+
+      .premium-summary::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #4a90e2, #357abd);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .premium-summary::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #357abd, #2563eb);
+      }
+
+      /* Premium button effects */
+      .premium-btn:active {
+        transform: translateY(1px) !important;
+      }
+
+      /* Smooth animations for summary content */
+      .premium-summary > div {
+        animation: slideInUp 0.4s ease-out;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Enhanced chat area styling */
+      .chatWrap.fade-scroll {
+        background: rgba(1,6,16,0.7) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1) !important;
+      }
+
+      /* Improved scrollbar for chat */
+      .chatWrap::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .chatWrap::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+      }
+
+      .chatWrap::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        transition: background 0.2s ease;
+      }
+
+      .chatWrap::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.3);
+      }
+
+      /* Enhanced scroll progress bar */
+      .scroll-progress {
+        background: linear-gradient(90deg, #4a90e2, #10b981, #f59e0b) !important;
+        box-shadow: 0 2px 8px rgba(74,144,226,0.4) !important;
+      }
+
+      /* Floating elements improvements */
+      .floating-nav {
+        backdrop-filter: blur(15px) !important;
+        background: rgba(255,255,255,0.95) !important;
+        border: 1px solid rgba(74,144,226,0.25) !important;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.18) !important;
+      }
+
+      .back-to-top {
+        background: linear-gradient(135deg, #4a90e2, #357abd) !important;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 8px 25px rgba(74,144,226,0.3) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Scroll progress indicator -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+    
+    <!-- animated background blobs -->
+    <div class="bg-blob blob-1" id="blob1"></div>
+    <div class="bg-blob blob-2" id="blob2"></div>
+    <div class="bg-blob blob-3" id="blob3"></div>
+
+    <div class="wrap">
+      <div class="container">
+        <div class="hero">
+          <h1>Smart Healthcare Assistant</h1>
+          <p class="lead">
+            Upload a medical PDF to generate a summarized audio response, or
+            chat with the local assistant for quick guidance.
+          </p>
+
+          <div class="uploadCard">
+            <input type="file" id="pdfFile" accept=".pdf" />
+            <div
+              style="
+                margin-top: 12px;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+              "
+            >
+              <button class="btn" onclick="startUpload()">
+                Upload & Process
+              </button>
+              <div
+                class="result"
+                id="result"
+                style="display: none; margin-left: 6px"
+              >
+                <p id="statusText">Processing...</p>
+                <audio
+                  id="audioPlayer"
+                  controls
+                  style="display: none; width: 260px"
+                ></audio>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="summaryBox"
+            style="
+              display: none;
+              margin-top: 32px;
+              background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.96) 100%);
+              padding: 36px;
+              border-radius: 24px;
+              border: 1px solid rgba(148,163,184,0.15);
+              box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 8px 25px rgba(0,0,0,0.04);
+              backdrop-filter: blur(20px);
+              transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+              max-height: 80vh;
+              overflow-y: auto;
+              position: relative;
+            "
+            class="fade-scroll premium-summary"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 28px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid rgba(225,236,244,0.5);
+                background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(240,248,255,0.4) 100%);
+                margin: -28px -28px 28px -28px;
+                padding: 24px 32px 20px 32px;
+                border-radius: 16px 16px 0 0;
+                backdrop-filter: blur(12px);
+              "
+            >
+              <h3 style="
+                margin: 0; 
+                color: #1e3a8a; 
+                font-size: 22px; 
+                font-weight: 800;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                letter-spacing: -0.025em;
+              ">📋 Medical Summary</h3>
+              <button
+                id="downloadBtn"
+                class="premium-btn"
+                style="
+                  font-size: 15px;
+                  padding: 14px 24px;
+                  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+                  color: white;
+                  border: none;
+                  border-radius: 12px;
+                  cursor: pointer;
+                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                  box-shadow: 0 6px 20px rgba(30,64,175,0.2);
+                  font-weight: 700;
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  letter-spacing: -0.02em;
+                  backdrop-filter: blur(10px);
+                "
+                onclick="downloadSummary()"
+                onmouseover="this.style.transform='translateY(-2px) scale(1.02)'; this.style.boxShadow='0 8px 30px rgba(30,64,175,0.3)'"
+                onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 6px 20px rgba(30,64,175,0.2)'"
+              >
+                <span style="font-size: 16px;">📄</span>
+                Download Report
+              </button>
+            </div>
+            
+            <div style="margin-bottom: 36px;">
+              <div style="
+                background: linear-gradient(135deg, rgba(74,144,226,0.06) 0%, rgba(59,130,246,0.04) 100%);
+                border-radius: 18px;
+                padding: 28px 32px;
+                border: 1px solid rgba(74,144,226,0.12);
+                box-shadow: 0 6px 25px rgba(74,144,226,0.06);
+                backdrop-filter: blur(12px);
+              ">
+                <div style="
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  margin-bottom: 20px;
+                ">
+                  <div style="
+                    width: 48px;
+                    height: 48px;
+                    background: linear-gradient(135deg, #4a90e2, #3b82f6);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    box-shadow: 0 4px 12px rgba(74,144,226,0.2);
+                  ">📝</div>
+                  <h4 style="
+                    color: #1e40af;
+                    margin: 0;
+                    font-size: 19px;
+                    font-weight: 700;
+                    letter-spacing: -0.02em;
+                  ">Summary Details</h4>
+                </div>
+                <div
+                  id="summaryText"
+                  style="
+                    background: rgba(255,255,255,0.95);
+                    padding: 26px 30px;
+                    border-radius: 14px;
+                    border-left: 4px solid #4a90e2;
+                    font-size: 15px;
+                    line-height: 1.7;
+                    color: #374151;
+                    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+                    white-space: pre-wrap;
+                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+                    max-height: 400px;
+                    overflow-y: auto;
+                    letter-spacing: -0.005em;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                    min-height: 80px;
+                  "
+                ></div>
+              </div>
+            </div>
+            
+            <div>
+              <div style="
+                background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.05) 100%);
+                border-radius: 18px;
+                padding: 28px 32px;
+                border: 1px solid rgba(16,185,129,0.15);
+                box-shadow: 0 6px 25px rgba(16,185,129,0.08);
+                backdrop-filter: blur(12px);
+              ">
+                <div style="
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  margin-bottom: 20px;
+                ">
+                  <div style="
+                    width: 48px;
+                    height: 48px;
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    box-shadow: 0 4px 12px rgba(16,185,129,0.2);
+                  ">🩺</div>
+                  <h4 style="
+                    color: #065f46;
+                    margin: 0;
+                    font-size: 19px;
+                    font-weight: 700;
+                    letter-spacing: -0.02em;
+                  ">Recommended Specialist</h4>
+                </div>
+                <div style="
+                  background: rgba(255,255,255,0.9);
+                  padding: 22px 26px;
+                  border-radius: 14px;
+                  border-left: 4px solid #10b981;
+                  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+                  min-height: 60px;
+                  display: flex;
+                  align-items: center;
+                ">
+                  <p id="specialistText" style="
+                    font-size: 16px;
+                    color: #1f2937;
+                    margin: 0;
+                    font-weight: 600;
+                    line-height: 1.6;
+                    letter-spacing: -0.005em;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                    hyphens: auto;
+                    width: 100%;
+                  "></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(74,144,226,0.08) 0%, rgba(59,130,246,0.05) 100%);
+            border-radius: 12px;
+            border-left: 4px solid #4a90e2;
+            border: 1px solid rgba(74,144,226,0.15);
+            box-shadow: 0 2px 8px rgba(74,144,226,0.1);
+          ">
+            <p style="
+              margin: 0;
+              color: #1e40af;
+              font-size: 14px;
+              font-weight: 600;
+              line-height: 1.5;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            ">
+              <span style="font-size: 16px;">💡</span>
+              <span><strong>Tip:</strong> Use the interactive assistant on the right for quick medical checks without uploading files.</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="chatWrap fade-scroll">
+          <div id="chat" aria-live="polite">
+            <div class="message bot">
+              Hello — I'm your local assistant. Try: "symptoms of diabetes",
+              "what is a normal blood pressure", or "how to treat a fever".
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="inputWrap">
+              <input
+                id="userInput"
+                type="text"
+                placeholder="Type your question..."
+              />
+              <button
+                id="voiceBtn"
+                class="iconBtn inside voice"
+                title="Toggle voice input"
+              >
+                🎤
+              </button>
+              <button
+                id="speakBtn"
+                class="iconBtn inside speak"
+                title="Read last assistant reply"
+              >
+                🔊
+              </button>
+            </div>
+            <button id="sendBtn" class="btn">Send</button>
+          </div>
+
+          <div class="suggestions">
+            Suggestions: <button class="suggest">fever</button>
+            <button class="suggest">blood pressure</button>
+            <button class="suggest">diabetes</button>
+          </div>
+          <div style="height: 6px"></div>
+          <div id="typing" style="display: none" class="typing">
+            Assistant is typing…
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Navigation -->
+    <div class="floating-nav" id="floatingNav">
+      <button class="nav-btn" onclick="scrollToSection('top')" title="Go to Upload Section">
+        ⬆️ Upload
+      </button>
+      <button class="nav-btn" onclick="scrollToSection('summary')" title="Go to Summary" id="summaryNavBtn" style="display:none;">
+        📋 Summary
+      </button>
+      <button class="nav-btn" onclick="scrollToSection('chat')" title="Go to Chat">
+        💬 Chat
+      </button>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToSection('top')" title="Back to Top">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4l-8 8h5v8h6v-8h5z"/>
+      </svg>
+    </button>
+
+    <script src="./medical_kb.js"></script>
+    <script>
+      // Navigation functions
+      function scrollToSection(section) {
+        const elements = {
+          'top': document.querySelector('.hero'),
+          'summary': document.getElementById('summaryBox'),
+          'chat': document.querySelector('.chatWrap')
+        };
+        
+        if (elements[section]) {
+          elements[section].scrollIntoView({ 
+            behavior: 'smooth', 
+            block: section === 'top' ? 'start' : 'center'
+          });
+        }
+      }
+
+      // Show/hide navigation based on scroll position and update progress
+      function updateNavigation() {
+        const scrollY = window.scrollY;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        const floatingNav = document.getElementById('floatingNav');
+        const backToTop = document.getElementById('backToTop');
+        const summaryBox = document.getElementById('summaryBox');
+        const summaryNavBtn = document.getElementById('summaryNavBtn');
+        const scrollProgress = document.getElementById('scrollProgress');
+        
+        // Update scroll progress indicator
+        const scrollPercent = (scrollY / (documentHeight - windowHeight)) * 100;
+        if (scrollProgress) {
+          scrollProgress.style.width = Math.min(100, Math.max(0, scrollPercent)) + '%';
+        }
+        
+        // Show floating nav after scrolling 100px
+        if (scrollY > 100) {
+          floatingNav.classList.add('show');
+        } else {
+          floatingNav.classList.remove('show');
+        }
+        
+        // Show back to top button after scrolling 100px
+        if (scrollY > 100) {
+          backToTop.classList.add('show');
+        } else {
+          backToTop.classList.remove('show');
+        }
+        
+        // Show summary nav button only when summary is visible
+        if (summaryBox && summaryBox.style.display !== 'none') {
+          summaryNavBtn.style.display = 'block';
+        } else {
+          summaryNavBtn.style.display = 'none';
+        }
+        
+        // Add scroll indicators for scrollable sections
+        updateScrollIndicators();
+      }
+      
+      // Add scroll indicators for sections with overflow
+      function updateScrollIndicators() {
+        const scrollableSections = [
+          document.getElementById('summaryBox'),
+          document.getElementById('chat')
+        ];
+        
+        scrollableSections.forEach(section => {
+          if (!section) return;
+          
+          const indicator = section.querySelector('.scroll-indicator') || 
+            (() => {
+              const ind = document.createElement('div');
+              ind.className = 'scroll-indicator';
+              ind.innerHTML = '<span style="font-size: 10px;">⬇️</span> Scroll for more';
+              section.style.position = 'relative';
+              section.appendChild(ind);
+              return ind;
+            })();
+          
+          const hasOverflow = section.scrollHeight > section.clientHeight;
+          const isScrolledToBottom = section.scrollTop + section.clientHeight >= section.scrollHeight - 5;
+          
+          if (hasOverflow && !isScrolledToBottom) {
+            indicator.classList.add('show');
+          } else {
+            indicator.classList.remove('show');
+          }
+        });
+      }
+
+      // Add scroll event listener
+      window.addEventListener('scroll', updateNavigation);
+      window.addEventListener('resize', updateNavigation);
+      
+      // Force initial call to show elements for testing
+      setTimeout(() => {
+        updateNavigation();
+      }, 1000);
+      
+      // Add scroll listeners for individual sections
+      document.addEventListener('DOMContentLoaded', () => {
+        const chat = document.getElementById('chat');
+        const summaryBox = document.getElementById('summaryBox');
+        
+        if (chat) {
+          chat.addEventListener('scroll', updateScrollIndicators);
+        }
+        
+        if (summaryBox) {
+          summaryBox.addEventListener('scroll', updateScrollIndicators);
+        }
+        
+        // Initial update
+        updateNavigation();
+        
+        // Ensure elements are found and working
+        console.log('Navigation elements:', {
+          floatingNav: document.getElementById('floatingNav'),
+          backToTop: document.getElementById('backToTop')
+        });
+        
+        // Add keyboard navigation for smooth scrolling
+        document.addEventListener('keydown', (e) => {
+          // Page Up/Page Down smooth scrolling
+          if (e.key === 'PageUp') {
+            e.preventDefault();
+            window.scrollBy({ top: -window.innerHeight * 0.8, behavior: 'smooth' });
+          } else if (e.key === 'PageDown') {
+            e.preventDefault();
+            window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+          }
+          // Home/End smooth scrolling
+          else if (e.key === 'Home' && e.ctrlKey) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (e.key === 'End' && e.ctrlKey) {
+            e.preventDefault();
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+          }
+        });
+      });
+
+      function downloadSummary() {
+        const summaryText = document.getElementById("summaryText").textContent;
+        const specialistText =
+          document.getElementById("specialistText").textContent;
+        const fileName =
+          document.getElementById("pdfFile").files[0]?.name ||
+          "medical-document";
+
+        const content = `Medical Summary Report
+Generated: ${new Date().toLocaleString()}
+Original File: ${fileName}
+
+SUMMARY:
+${summaryText}
+
+RECOMMENDED SPECIALIST:
+${specialistText}
+
+---
+Generated by Smart Healthcare Assistant`;
+
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${fileName.replace(".pdf", "")}-summary.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      async function startUpload() {
+        const fileInput = document.getElementById("pdfFile");
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please select a PDF file.");
+          return;
+        }
+        const resultDiv = document.getElementById("result");
+        const statusText = document.getElementById("statusText");
+        const audioPlayer = document.getElementById("audioPlayer");
+        resultDiv.style.display = "block";
+        statusText.textContent = "Requesting upload URL...";
+        try {
+          // STEP 1: Ask Lambda for presigned URL
+          const req1 = await fetch(
+            "https://yfme6ifip3.execute-api.ap-southeast-2.amazonaws.com/prod/submit-pdf",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ fileName: file.name }),
+            }
+          );
+          const res1 = await req1.json();
+          const uploadUrl = res1.uploadUrl;
+          const fileKey = res1.fileKey;
+          // STEP 2: Upload file to S3 using presigned URL
+          statusText.textContent = "Uploading PDF to S3...";
+          await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "application/pdf" },
+            body: file,
+          });
+          statusText.textContent = "Processing PDF via Lambda...";
+          // STEP 3: Ask Lambda to process using S3 key
+          const req2 = await fetch(
+            "https://yfme6ifip3.execute-api.ap-southeast-2.amazonaws.com/prod/submit-pdf",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                s3Bucket: "smart-healthcare-assistant",
+                s3Key: fileKey,
+              }),
+            }
+          );
+          const res2 = await req2.json();
+          const audioUrl = res2.audio_s3_url;
+          if (!audioUrl) {
+            statusText.textContent = "No audio generated.";
+            return;
+          }
+          // populate JSON details with animation
+          const summaryBox = document.getElementById("summaryBox");
+          const summaryTextEl = document.getElementById("summaryText");
+          
+          summaryBox.style.display = "block";
+          summaryBox.style.opacity = "0";
+          summaryBox.style.transform = "translateY(20px)";
+          
+          summaryTextEl.textContent = res2.summary_text;
+          document.getElementById("specialistText").textContent =
+            res2.recommended_specialist + " (" + res2.recommendation_reason + ")";
+          
+          // Update navigation to show summary button
+          setTimeout(() => {
+            updateNavigation();
+          }, 600);
+          
+          // Animate in the summary box
+          setTimeout(() => {
+            summaryBox.style.transition = "all 0.5s ease";
+            summaryBox.style.opacity = "1";
+            summaryBox.style.transform = "translateY(0)";
+          }, 100);
+
+          // audio
+          audioPlayer.src = audioUrl;
+          audioPlayer.style.display = "block";
+          statusText.textContent = "Audio & Summary Ready!";
+        } catch (err) {
+          console.error(err);
+          statusText.textContent = "Something went wrong.";
+        }
+      }
+
+      // --- Interactive assistant logic & UI enhancements ---
+      (function () {
+        const chat = document.getElementById("chat");
+        const userInput = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const voiceBtn = document.getElementById("voiceBtn");
+        const speakBtn = document.getElementById("speakBtn");
+        const suggests = document.querySelectorAll(".suggest");
+        const typingEl = document.getElementById("typing");
+
+        // background blobs for parallax
+        const blobs = [
+          document.getElementById("blob1"),
+          document.getElementById("blob2"),
+          document.getElementById("blob3"),
+        ];
+
+        // ripple effect helper
+        function addRipple(e) {
+          const btn = e.currentTarget;
+          const circle = document.createElement("span");
+          const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+          const radius = diameter / 2;
+          circle.style.width = circle.style.height = diameter + "px";
+          circle.style.left =
+            e.clientX - btn.getBoundingClientRect().left - radius + "px";
+          circle.style.top =
+            e.clientY - btn.getBoundingClientRect().top - radius + "px";
+          circle.style.position = "absolute";
+          circle.style.borderRadius = "50%";
+          circle.style.background = "rgba(255,255,255,0.08)";
+          circle.style.transform = "scale(0)";
+          circle.style.pointerEvents = "none";
+          circle.style.transition = "transform .45s ease, opacity .45s ease";
+          // don't override btn positioning (keeps layout stable)
+          if (getComputedStyle(btn).position === "static") {
+            btn.style.position = "relative";
+          }
+          btn.appendChild(circle);
+          requestAnimationFrame(() => {
+            circle.style.transform = "scale(1)";
+            circle.style.opacity = "0";
+          });
+          setTimeout(() => {
+            btn.removeChild(circle);
+          }, 500);
+        }
+
+        let lastAssistantText = "";
+        let recognition = null;
+        let recognizing = false;
+
+        // Use external medical KB when available; otherwise fallback to a minimal inline KB
+        const kb =
+          window.MEDICAL_KB &&
+          Array.isArray(window.MEDICAL_KB) &&
+          window.MEDICAL_KB.length
+            ? window.MEDICAL_KB
+            : [
+                {
+                  q: ["fever", "temperature"],
+                  a: "A fever is a body temperature above 38°C (100.4°F). For adults, rest, fluids, and antipyretics like paracetamol (acetaminophen) or ibuprofen can help. Seek care if fever is very high or prolonged.",
+                },
+                {
+                  q: ["blood pressure", "hypertension", "bp"],
+                  a: "Normal blood pressure is around 120/80 mmHg. Hypertension requires monitoring and sometimes medication; contact a clinician for management.",
+                },
+                {
+                  q: ["diabetes", "blood sugar"],
+                  a: "Diabetes leads to high blood glucose; management includes diet, exercise, monitoring, and medication as prescribed.",
+                },
+                {
+                  q: ["covid", "coronavirus"],
+                  a: "COVID-19 causes respiratory symptoms and sometimes loss of smell/taste; follow local guidance on testing and isolation.",
+                },
+              ];
+
+        function appendMessage(text, who = "user") {
+          const div = document.createElement("div");
+          div.className = "message " + who;
+          div.style.padding = "8px 10px";
+          div.style.margin = "6px 0";
+          div.style.borderRadius = "6px";
+          if (who === "user") {
+            div.style.background = "#eef6ff";
+            div.style.alignSelf = "flex-end";
+            div.style.textAlign = "right";
+          } else {
+            div.style.background = "#f1f7ff";
+          }
+          div.textContent = text;
+          chat.appendChild(div);
+          chat.scrollTop = chat.scrollHeight;
+        }
+
+        function findAnswer(text) {
+          const t = text.toLowerCase();
+          for (const item of kb) {
+            for (const k of item.q) {
+              if (t.includes(k)) return item.a;
+            }
+          }
+          // fallback
+          return "I can help with common topics like fever, blood pressure, diabetes, headaches, and COVID. Try one of the suggestions or provide more details.";
+        }
+
+        // small conversational replies (greetings, thanks)
+        function checkShortReplies(text) {
+          if (!text) return null;
+          const t = text.trim().toLowerCase();
+          // simple greetings
+          if (t === "hi" || t === "hello" || t === "hey" || t === "hey")
+            return "Hi there! How can I assist you today?";
+          if (
+            t === "how are you" ||
+            t === "how's it going" ||
+            t === "how are you?" ||
+            t === "how's it going?"
+          )
+            return "I'm good. Hope you are also Good!!     I'm a local assistant — here to help you!";
+          // thank you responses
+          if (t === "thank you" || t === "thanks" || t === "thanks!")
+            return "You're welcome — glad to help.";
+          return null;
+        }
+
+        function speak(text) {
+          lastAssistantText = text;
+          if ("speechSynthesis" in window) {
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = "en-US";
+            utter.rate = 1.0;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+          } else {
+            console.warn("TTS not supported in this browser.");
+          }
+        }
+
+        function handleQuery(query) {
+          if (!query || !query.trim()) return;
+          appendMessage(query, "user");
+          // check simple conversational replies first
+          const short = checkShortReplies(query);
+          if (short) {
+            appendMessage(short, "bot");
+            speak(short);
+            return;
+          }
+          const answer = findAnswer(query);
+          // show typing indicator
+          if (typingEl) typingEl.style.display = "block";
+          // small delay to feel natural
+          setTimeout(() => {
+            if (typingEl) typingEl.style.display = "none";
+            appendMessage(answer, "bot");
+            speak(answer);
+          }, 700 + Math.min(1200, answer.length * 8));
+        }
+
+        sendBtn.addEventListener("click", () => {
+          handleQuery(userInput.value);
+          userInput.value = "";
+          userInput.focus();
+        });
+
+        // add ripple to buttons
+        [sendBtn, voiceBtn, speakBtn].forEach((b) => {
+          b.addEventListener("click", addRipple);
+        });
+
+        userInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            sendBtn.click();
+          }
+        });
+
+        suggests.forEach((b) => {
+          b.addEventListener("click", () => {
+            userInput.value = b.textContent;
+            sendBtn.click();
+          });
+        });
+
+        speakBtn.addEventListener("click", () => {
+          if (lastAssistantText) speak(lastAssistantText);
+        });
+
+        // Setup Speech Recognition if available
+        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognition = new SR();
+          recognition.lang = "en-US";
+          recognition.interimResults = false;
+          recognition.maxAlternatives = 1;
+
+          recognition.addEventListener("result", (e) => {
+            const text = e.results[0][0].transcript;
+            userInput.value = text;
+            handleQuery(text);
+          });
+
+          recognition.addEventListener("end", () => {
+            recognizing = false;
+            voiceBtn.classList.remove("recording");
+          });
+
+          voiceBtn.addEventListener("click", () => {
+            if (recognizing) {
+              recognition.stop();
+              return;
+            }
+            try {
+              recognition.start();
+              recognizing = true;
+              voiceBtn.classList.add("recording");
+            } catch (err) {
+              console.error(err);
+            }
+          });
+        } else {
+          // disable voice button politely
+          voiceBtn.addEventListener("click", () => {
+            alert(
+              "Voice input is not supported in this browser. Try Chrome or Edge."
+            );
+          });
+        }
+
+        // small accessibility: focus the input on load
+        userInput.focus();
+
+        // mouse parallax for blobs
+        document.addEventListener("mousemove", (e) => {
+          const cx = e.clientX - window.innerWidth / 2;
+          const cy = e.clientY - window.innerHeight / 2;
+          blobs.forEach((b, i) => {
+            const depth = (i + 1) * 0.02;
+            b.style.transform = `translate(${cx * depth}px, ${cy * depth}px)`;
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
